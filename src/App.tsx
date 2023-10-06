@@ -1,4 +1,3 @@
-import { Counter } from "./features/counter/Counter"
 import "./App.css"
 import { Exchanger } from "./features/exchanger/Exchanger"
 import { QueryClient, QueryClientProvider } from "react-query"
@@ -10,7 +9,6 @@ function App() {
     <div className="App">
       <QueryClientProvider client={queryClient}>
         <Exchanger />
-        <Counter />
       </QueryClientProvider>
     </div>
   )
