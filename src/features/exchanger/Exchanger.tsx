@@ -31,13 +31,13 @@ export function Exchanger() {
           {"S"}
         </div>
         <Wallet
+          source
           currency={sourceWallet.currency}
           balance={sourceWallet.balance}
           value={sourceWallet.value}
           error={sourceWallet.error}
         />
         <Wallet
-          disabled
           currency={targetWallet.currency}
           balance={targetWallet.balance}
           value={targetWallet.value}

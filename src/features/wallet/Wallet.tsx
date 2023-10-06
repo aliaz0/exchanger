@@ -1,10 +1,13 @@
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react"
 import "./Wallet.css"
 import { useAppDispatch } from "../../app/hooks"
-import { changeReadyToExchange } from "../exchanger/exchangerSlice"
+import {
+  changeCurrency,
+  changeReadyToExchange,
+} from "../exchanger/exchangerSlice"
 
 export function Wallet({
-  disabled = false,
+  source = false,
   currency,
   balance,
   value = undefined,
@@ -42,14 +45,23 @@ export function Wallet({
   }
 
   return (
-    <div className={"wallet-card" + (disabled ? " wallet-card--disabled" : "")}>
+    <div className={"wallet-card" + (source ? "" : " wallet-card--disabled")}>
       <div className="grid grid--gap-200">
         <select
           className="grid__item--column-1-2 grid__item--row-1-2 select"
           value={currency}
+          onChange={(event) =>
+            dispatch(
+              changeCurrency({
+                source,
+                currency: event.target.value as CurrencyType,
+              }),
+            )
+          }
         >
           <option value={"GBP"}>GBP</option>
           <option value={"USD"}>USD</option>
+          <option value={"IRR"}>IRR</option>
         </select>
         <span className="grid__item--column-1-2 grid__item--row-2-3 span">
           {balance}
@@ -57,11 +69,11 @@ export function Wallet({
         <input
           className={
             "grid__item--column-2-3 grid__item--row-1-2 input" +
-            (disabled ? " input--disabled" : "")
+            (source ? "" : " input--disabled")
           }
           onKeyDown={validate}
-          disabled={disabled}
-          placeholder={disabled ? "" : "Inter an amount to exchange"}
+          disabled={!source}
+          placeholder={source ? "Inter an amount to exchange" : ""}
           value={innerValue}
           onChange={handleChange}
         />
@@ -77,10 +89,10 @@ export function Wallet({
 
 const VALIDATION_REGEX = /^[0-9]*(\.[0-9]{0,2})?$/
 
-export type CurrencyType = "USD" | "GBP"
+export type CurrencyType = "USD" | "GBP" | "IRR"
 
 type WalletPropsType = {
-  disabled?: boolean
+  source?: boolean
   currency: CurrencyType
   balance: number
   value?: number | null

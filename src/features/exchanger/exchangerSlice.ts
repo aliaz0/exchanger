@@ -29,6 +29,7 @@ const initialState: ExchangerState = {
       ratio: {
         GBP: 1,
         USD: 1.379853,
+        IRR: 30000,
       },
     },
     USD: {
@@ -36,6 +37,15 @@ const initialState: ExchangerState = {
       ratio: {
         GBP: 0.724714,
         USD: 1,
+        IRR: 35000,
+      },
+    },
+    IRR: {
+      balance: Math.random() * 10000,
+      ratio: {
+        GBP: 0.005,
+        USD: 0.006,
+        IRR: 1,
       },
     },
   },
@@ -74,11 +84,8 @@ export const exchangeSlice = createSlice({
     },
 
     changeReadyToExchange: (state, action: PayloadAction<number | null>) => {
-      if (action.payload === state.sourceWallet.readyToExchange) {
-        return
-      }
-
       state.sourceWallet.errorMessage = null
+      state.targetWallet.errorMessage = null
 
       state.sourceWallet.readyToExchange = action.payload
       state.targetWallet.readyToExchange = action.payload
@@ -99,10 +106,47 @@ export const exchangeSlice = createSlice({
       state.sourceWallet = state.targetWallet
       state.targetWallet = temp
     },
+
+    changeCurrency: (state, action: PayloadAction<ChangeCurrencyPayload>) => {
+      if (action.payload.source) {
+        if (action.payload.currency === state.targetWallet.currency) {
+          state.sourceWallet.errorMessage = null
+          const temp = state.sourceWallet
+          state.sourceWallet = state.targetWallet
+          state.targetWallet = temp
+          return
+        }
+        state.sourceWallet.currency = action.payload.currency
+      } else {
+        if (action.payload.currency === state.sourceWallet.currency) {
+          state.sourceWallet.errorMessage = null
+          const temp = state.sourceWallet
+          state.sourceWallet = state.targetWallet
+          state.targetWallet = temp
+          return
+        }
+        state.targetWallet.currency = action.payload.currency
+      }
+
+      state.sourceWallet.errorMessage = null
+      state.targetWallet.errorMessage = null
+
+      state.targetWallet.readyToExchange = state.sourceWallet.readyToExchange
+        ? parseFloat(
+            (
+              state.sourceWallet.readyToExchange *
+              state.wallets[state.sourceWallet.currency].ratio[
+                state.targetWallet.currency
+              ]
+            ).toFixed(2),
+          )
+        : null
+    },
   },
 })
 
-export const { exchange, changeReadyToExchange, swap } = exchangeSlice.actions
+export const { exchange, changeReadyToExchange, swap, changeCurrency } =
+  exchangeSlice.actions
 
 export const selectSourceWallet = (state: RootState) => ({
   currency: state.exchange.sourceWallet.currency,
@@ -132,3 +176,8 @@ export const selectRatio = (state: RootState) =>
   ]
 
 export default exchangeSlice.reducer
+
+type ChangeCurrencyPayload = {
+  source: boolean
+  currency: CurrencyType
+}
