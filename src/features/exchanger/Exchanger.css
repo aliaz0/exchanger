@@ -1,3 +1,12 @@
+.vertical-layout {
+  display: block;
+}
+
+.vertical-layout__item {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 .relative-box {
   position: relative;
 }
@@ -45,4 +54,20 @@
 
 .circle-button:hover {
   background-color: #ddf;
+}
+
+.ellipse-button {
+  width: 200px;
+  height: 50px;
+  background-color: rgb(150, 81, 214);
+  border-radius: 50px;
+  border: 1px solid grey;
+  font-size: 20px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.ellipse-button:hover {
+  background-color: blueviolet;
 }

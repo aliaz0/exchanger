@@ -13,10 +13,12 @@ export interface ExchangerState {
   sourceWallet: {
     currency: CurrencyType
     readyToExchange: number | null
+    errorMessage: string | null
   }
   targetWallet: {
     currency: CurrencyType
     readyToExchange: number | null
+    errorMessage: string | null
   }
 }
 
@@ -40,10 +42,12 @@ const initialState: ExchangerState = {
   sourceWallet: {
     currency: "GBP",
     readyToExchange: null,
+    errorMessage: null,
   },
   targetWallet: {
     currency: "USD",
     readyToExchange: null,
+    errorMessage: null,
   },
 }
 
@@ -52,17 +56,29 @@ export const exchangeSlice = createSlice({
   initialState,
   reducers: {
     exchange: (state) => {
-      state.wallets[state.sourceWallet.currency].balance -=
-        state.sourceWallet.readyToExchange ?? 0
+      if (
+        state.wallets[state.sourceWallet.currency].balance >
+        (state.sourceWallet.readyToExchange ?? 0)
+      ) {
+        state.wallets[state.sourceWallet.currency].balance -=
+          state.sourceWallet.readyToExchange ?? 0
 
-      state.wallets[state.targetWallet.currency].balance +=
-        state.targetWallet.readyToExchange ?? 0
+        state.wallets[state.targetWallet.currency].balance +=
+          state.targetWallet.readyToExchange ?? 0
+
+        state.sourceWallet.readyToExchange = null
+        state.targetWallet.readyToExchange = null
+      } else {
+        state.sourceWallet.errorMessage = "wallet balance is insufficient"
+      }
     },
 
     changeReadyToExchange: (state, action: PayloadAction<number | null>) => {
       if (action.payload === state.sourceWallet.readyToExchange) {
         return
       }
+
+      state.sourceWallet.errorMessage = null
 
       state.sourceWallet.readyToExchange = action.payload
       state.targetWallet.readyToExchange = action.payload
@@ -78,6 +94,7 @@ export const exchangeSlice = createSlice({
     },
 
     swap: (state) => {
+      state.sourceWallet.errorMessage = null
       const temp = state.sourceWallet
       state.sourceWallet = state.targetWallet
       state.targetWallet = temp
@@ -95,6 +112,7 @@ export const selectSourceWallet = (state: RootState) => ({
       state.exchange.sourceWallet.currency
     ].balance.toFixed(2),
   ),
+  error: state.exchange.sourceWallet.errorMessage,
 })
 
 export const selectTargetWallet = (state: RootState) => ({
@@ -105,6 +123,7 @@ export const selectTargetWallet = (state: RootState) => ({
       state.exchange.targetWallet.currency
     ].balance.toFixed(2),
   ),
+  error: state.exchange.targetWallet.errorMessage,
 })
 
 export const selectRatio = (state: RootState) =>

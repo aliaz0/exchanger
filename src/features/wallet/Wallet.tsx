@@ -8,6 +8,7 @@ export function Wallet({
   currency,
   balance,
   value = undefined,
+  error = undefined,
 }: WalletPropsType) {
   const dispatch = useAppDispatch()
 
@@ -55,7 +56,7 @@ export function Wallet({
         </span>
         <input
           className={
-            "grid__item--column-2-3 grid__item--row-1-3 input" +
+            "grid__item--column-2-3 grid__item--row-1-2 input" +
             (disabled ? " input--disabled" : "")
           }
           onKeyDown={validate}
@@ -64,6 +65,11 @@ export function Wallet({
           value={innerValue}
           onChange={handleChange}
         />
+        <span
+          className={"grid__item--column-2-3 grid__item--row-2-3 error-message"}
+        >
+          {error}
+        </span>
       </div>
     </div>
   )
@@ -78,4 +84,5 @@ type WalletPropsType = {
   currency: CurrencyType
   balance: number
   value?: number | null
+  error?: string | null
 }

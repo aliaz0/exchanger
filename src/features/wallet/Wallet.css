@@ -79,3 +79,8 @@
   color: grey;
   text-align: left;
 }
+
+.error-message {
+  font-size: 15px;
+  color: red;
+}
