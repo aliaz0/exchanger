@@ -28,23 +28,23 @@ const initialState: ExchangerState = {
       balance: Math.random() * 10000,
       ratio: {
         GBP: 1,
-        USD: 1.379853,
-        IRR: 30000,
+        USD: 0,
+        IRR: 0,
       },
     },
     USD: {
       balance: Math.random() * 10000,
       ratio: {
-        GBP: 0.724714,
+        GBP: 0,
         USD: 1,
-        IRR: 35000,
+        IRR: 0,
       },
     },
     IRR: {
       balance: Math.random() * 10000,
       ratio: {
-        GBP: 0.005,
-        USD: 0.006,
+        GBP: 0,
+        USD: 0,
         IRR: 1,
       },
     },
@@ -142,11 +142,34 @@ export const exchangeSlice = createSlice({
           )
         : null
     },
+
+    updateRatio: (state, action: PayloadAction<UpdateRatioPayload>) => {
+      state.wallets[action.payload.base_code].ratio.GBP =
+        action.payload.conversion_rates.GBP
+      state.wallets[action.payload.base_code].ratio.USD =
+        action.payload.conversion_rates.USD
+      state.wallets[action.payload.base_code].ratio.IRR =
+        action.payload.conversion_rates.IRR
+
+      state.targetWallet.readyToExchange = state.sourceWallet.readyToExchange
+        ? parseFloat(
+            (
+              state.sourceWallet.readyToExchange *
+              action.payload.conversion_rates[state.targetWallet.currency]
+            ).toFixed(2),
+          )
+        : null
+    },
   },
 })
 
-export const { exchange, changeReadyToExchange, swap, changeCurrency } =
-  exchangeSlice.actions
+export const {
+  exchange,
+  changeReadyToExchange,
+  swap,
+  changeCurrency,
+  updateRatio,
+} = exchangeSlice.actions
 
 export const selectSourceWallet = (state: RootState) => ({
   currency: state.exchange.sourceWallet.currency,
@@ -180,4 +203,9 @@ export default exchangeSlice.reducer
 type ChangeCurrencyPayload = {
   source: boolean
   currency: CurrencyType
+}
+
+type UpdateRatioPayload = {
+  base_code: CurrencyType
+  conversion_rates: Record<CurrencyType, number>
 }

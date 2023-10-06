@@ -1,3 +1,5 @@
+import { useEffect } from "react"
+import { useRatioQuery } from "../../api/api"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { Wallet } from "../wallet/Wallet"
 import "./Exchanger.css"
@@ -7,6 +9,7 @@ import {
   selectSourceWallet,
   selectTargetWallet,
   swap,
+  updateRatio,
 } from "./exchangerSlice"
 
 export function Exchanger() {
@@ -15,6 +18,22 @@ export function Exchanger() {
   const sourceWallet = useAppSelector(selectSourceWallet)
   const targetWallet = useAppSelector(selectTargetWallet)
   const ratio = useAppSelector(selectRatio)
+
+  const { data, error, isLoading } = useRatioQuery(sourceWallet.currency)
+
+  useEffect(() => {
+    if (data) {
+      dispatch(updateRatio(data))
+    }
+  }, [data, dispatch])
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error</div>
+  }
 
   return (
     <div className="vertical-layout">
