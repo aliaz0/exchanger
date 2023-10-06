@@ -5,7 +5,7 @@
 }
 
 .wallet-card--disabled {
-  background-color: #EEE;
+  background-color: #eee;
 }
 
 .grid {
@@ -71,9 +71,11 @@
   font-weight: bold;
   border: none;
   background: none;
+  padding: 0;
 }
 
 .span {
   font-size: 18px;
   color: grey;
+  text-align: left;
 }

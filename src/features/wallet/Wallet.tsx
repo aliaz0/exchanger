@@ -1,23 +1,57 @@
-import { KeyboardEvent } from "react"
+import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react"
 import "./Wallet.css"
+import { useAppDispatch } from "../../app/hooks"
+import { changeReadyToExchange } from "../exchanger/exchangerSlice"
 
 export function Wallet({
   disabled = false,
   currency,
-  amount,
+  balance,
+  value = undefined,
 }: WalletPropsType) {
+  const dispatch = useAppDispatch()
+
+  const [innerValue, setInnerValue] = useState<string | undefined>(
+    value === null ? "" : value?.toString(),
+  )
+
+  useEffect(() => {
+    setInnerValue(value === null ? "" : value?.toString())
+  }, [value])
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (VALIDATION_REGEX.test(event.target.value)) {
+      setInnerValue(event.target.value)
+      dispatch(
+        changeReadyToExchange(
+          event.target.value ? Number(event.target.value) : null,
+        ),
+      )
+    }
+  }
+
+  const validate = (event: KeyboardEvent) => {
+    if (event.code === "Backspace" || event.code === "Delete") {
+      return
+    }
+
+    if (!VALIDATION_REGEX.test(innerValue ?? "" + event.key)) {
+      event.preventDefault()
+    }
+  }
+
   return (
     <div className={"wallet-card" + (disabled ? " wallet-card--disabled" : "")}>
       <div className="grid grid--gap-200">
         <select
           className="grid__item--column-1-2 grid__item--row-1-2 select"
-          defaultValue={currency}
+          value={currency}
         >
           <option value={"GBP"}>GBP</option>
           <option value={"USD"}>USD</option>
         </select>
         <span className="grid__item--column-1-2 grid__item--row-2-3 span">
-          {amount}
+          {balance}
         </span>
         <input
           className={
@@ -27,25 +61,21 @@ export function Wallet({
           onKeyDown={validate}
           disabled={disabled}
           placeholder={disabled ? "" : "Inter an amount to exchange"}
+          value={innerValue}
+          onChange={handleChange}
         />
       </div>
     </div>
   )
 }
 
-const validate = (event: KeyboardEvent) => {
-  if (event.code === "Backspace" || event.code === "Delete") {
-    return
-  }
+const VALIDATION_REGEX = /^[0-9]*(\.[0-9]{0,2})?$/
 
-  const regex = /[0-9]|\./
-  if (!regex.test(event.key)) {
-    event.preventDefault()
-  }
-}
+export type CurrencyType = "USD" | "GBP"
 
 type WalletPropsType = {
   disabled?: boolean
-  currency: "USD" | "GBP"
-  amount: number
+  currency: CurrencyType
+  balance: number
+  value?: number | null
 }
